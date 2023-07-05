@@ -1,11 +1,15 @@
 from __future__ import division, print_function, absolute_import
 import numpy as np
+import cv2
 
 from deep_sort.application_util import preprocessing
 from deep_sort.application_util.visualization import draw_trackers
 from deep_sort.deep_sort import nn_matching
 from deep_sort.deep_sort.detection import Detection
 from deep_sort.deep_sort.tracker import Tracker
+
+
+SELECTED_OBJECT_ID = 2
 
 def gather_sequence_info(detections, image):
     """Gather sequence information, such as image filenames, detections,
@@ -69,7 +73,15 @@ def run(image, detection, config, min_confidence,
     tracker.predict()
     tracker.update(detections)
 
+    target_box_central=[image.shape[0:2][::-1]]
+    for track in tracker.tracks:
+        if track.track_id == SELECTED_OBJECT_ID:
+            x, y, w, h = track.to_tlwh()
+            target_box_central=[x+w/2, y+h/2]
+            break
+
     draw_trackers(tracker.tracks, img_cpy)
+    return target_box_central
 
 def run_deep_sort(image, detection, config):
     min_confidence = 0.1

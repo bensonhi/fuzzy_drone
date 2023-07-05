@@ -7,6 +7,8 @@ import numpy as np
 from PIL import ImageGrab
 import cv2
 import drone_kit
+from deep_sort.fuzzy_util import controller
+
 
 # 設定要捕獲的螢幕範圍（左上角座標和右下角座標）
 screen_coordinates = (1225,0 , 2550, 1080)  # 自行調整螢幕解析度
@@ -16,6 +18,7 @@ drone_kit.arm_and_takeoff(100)
 model = ObjectRecognition()
 encoder = init_encoder()
 config = DeepSORTConfig()
+FuzzyController = controller.FuzzyController()
 
 
 while (True):
@@ -25,7 +28,8 @@ while (True):
 
     if len(boxes) > 0:
         encoding = generate_detections(encoder, boxes, frame)
-        run_deep_sort(frame, encoding, config)
+        target_box_central=run_deep_sort(frame, encoding, config)
+        fuzzy_result = FuzzyController.run(target_box_central, frame.shape[0:2][::-1])
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
