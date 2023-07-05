@@ -42,7 +42,7 @@ def arm_and_takeoff(aTargetAltitude):
 
 
 
-def condition_yaw(vehicle, heading, relative, clock_wise):
+def condition_yaw(heading, relative, clock_wise):
     # 使用相对角度或绝对方位
     if relative:
         isRelative = 1

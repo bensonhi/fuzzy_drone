@@ -58,7 +58,7 @@ def draw_boxes(image, boxes, class_names, scores, selected_indices, max_boxes=MA
         break
     if i not in selected_indices:
         continue
-    if scores[i] >= min_score and class_names[i] in LABEL_SELECTOR:
+    if scores[i] >= min_score:
       ymin, xmin, ymax, xmax = tuple(boxes[i])
       display_str = "{}: {}%".format(class_names[i].decode("ascii"), int(100 * scores[i]))
       color = colors[hash(class_names[i]) % len(colors)]
@@ -75,7 +75,7 @@ def get_boxes(image, boxes, class_names, scores, selected_indices, min_score=0.2
   for i in range(boxes.shape[0]):
     if box_count >= MAX_OBJECTS:
         break
-    if class_names[i] not in LABEL_SELECTOR or i not in selected_indices:
+    if i not in selected_indices:
         continue
     if scores[i] >= min_score:
       ymin, xmin, ymax, xmax = tuple(boxes[i])
