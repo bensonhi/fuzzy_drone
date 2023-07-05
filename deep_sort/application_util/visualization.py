@@ -89,6 +89,9 @@ def draw_detections(detections, image):
 
 def draw_trackers(tracks, image):
     thickness = 2
+    if (len(tracks) == 0):
+        cv2.imshow("frame", image)
+        return
     for track in tracks:
         if not track.is_confirmed() or track.time_since_update > 0:
             continue
