@@ -9,8 +9,6 @@ from deep_sort.deep_sort.detection import Detection
 from deep_sort.deep_sort.tracker import Tracker
 
 
-SELECTED_OBJECT_ID = 2
-
 def gather_sequence_info(detections, image):
     """Gather sequence information, such as image filenames, detections,
     groundtruth (if available).
@@ -49,7 +47,7 @@ def create_detections(detection_mat, min_height=0, frame_idx=1):
 
 
 def run(image, detection, config, min_confidence,
-        nms_max_overlap, min_detection_height):
+        nms_max_overlap, min_detection_height, selected_object_id):
 
     img_cpy = image.copy()
     seq_info = gather_sequence_info(detection, img_cpy)
@@ -75,7 +73,7 @@ def run(image, detection, config, min_confidence,
 
     target_box_central=[image.shape[0:2][::-1]]
     for track in tracker.tracks:
-        if track.track_id == SELECTED_OBJECT_ID:
+        if track.track_id == selected_object_id:
             x, y, w, h = track.to_tlwh()
             target_box_central=[x+w/2, y+h/2]
             break
@@ -83,11 +81,11 @@ def run(image, detection, config, min_confidence,
     draw_trackers(tracker.tracks, img_cpy)
     return target_box_central
 
-def run_deep_sort(image, detection, config):
+def run_deep_sort(image, detection, selected_object_id, config):
     min_confidence = 0.1
     nms_max_overlap = 1.0
     min_detection_height = 0.0
-    run(image, detection, config, min_confidence, nms_max_overlap, min_detection_height)
+    return run(image, detection, config, min_confidence, nms_max_overlap, min_detection_height, selected_object_id)
 
 class DeepSORTConfig:
     def __init__(self, max_cosine_distance=0.2, nn_budget = 100):
