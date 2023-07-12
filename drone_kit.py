@@ -70,3 +70,18 @@ def condition_yaw(heading, relative, clock_wise):
     # 发送指令
     vehicle.send_mavlink(msg)
     vehicle.flush()
+
+
+def goto(x_coordinate, y_coordinate, alt):
+    print("Set default/target airspeed to 3")
+    vehicle.airspeed = 3
+
+    point1 = LocationGlobalRelative(x_coordinate, y_coordinate, alt)
+    vehicle.simple_goto(point1)
+
+def clear():
+    cmds = vehicle.commands
+    cmds.clear()
+    vehicle.flush()
+
+
