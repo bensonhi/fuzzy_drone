@@ -32,13 +32,11 @@ selected_object_id = 0
 def get_target_id():
     ROOT = tk.Tk()
 
-    ROOT.withdraw()
-    # the input dialog
-    USER_INP = simpledialog.askstring(title="Test",
-                                      prompt="Which is your desired target?:")
     global selected_object_id
     while(True):
-        selected_object_id = input()
+        ROOT.withdraw()
+        selected_object_id = simpledialog.askinteger(title="Test",
+                                          prompt="Which is your desired target?:")
 
 
 
