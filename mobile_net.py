@@ -11,7 +11,7 @@ from PIL import ImageFont
 MAX_OBJECTS = 10
 
 # Labels of interest
-LABEL_SELECTOR = set([b'Person'])
+# LABEL_SELECTOR = set([b'Person'])
 
 def draw_bounding_box_on_image(image, ymin, xmin, ymax, xmax, color,
                                font, thickness=4, display_str_list=()):

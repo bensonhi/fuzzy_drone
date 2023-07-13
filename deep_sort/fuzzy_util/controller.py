@@ -76,3 +76,5 @@ class FuzzyController:
         # 輸出結果
         print("Vertical Motor:", vertical_motor)
         print("Horizontal Motor:", horizontal_motor)
+
+        return [vertical_motor, horizontal_motor]

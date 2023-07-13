@@ -49,9 +49,9 @@ def object_tracking():
         if len(boxes) > 0:
             encoding = generate_detections(encoder, boxes, frame)
             target_box_central=run_deep_sort(frame, encoding, selected_object_id, config)
-            print(selected_object_id)
             if(target_box_central!=None):
-                fuzzy_result = FuzzyController.run(target_box_central[0], frame.shape[0:2][::-1])
+                fuzzy_result = FuzzyController.run(target_box_central, frame.shape[0:2][::-1])
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
