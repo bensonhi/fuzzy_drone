@@ -26,7 +26,7 @@ encoder = init_encoder()
 config = DeepSORTConfig()
 FuzzyController = controller.FuzzyController()
 
-selected_object_id = 0
+selected_object_id = -1
 
 # spawn a new thread to wait for input
 def get_target_id():

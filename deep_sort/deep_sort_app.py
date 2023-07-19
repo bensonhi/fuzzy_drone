@@ -71,7 +71,7 @@ def run(image, detection, config, min_confidence,
     tracker.predict()
     tracker.update(detections)
 
-    target_box_central=image.shape[0:2][::-1]
+    target_box_central=None
     for track in tracker.tracks:
         if track.track_id == selected_object_id:
             x, y, w, h = track.to_tlwh()
