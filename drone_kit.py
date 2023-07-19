@@ -1,6 +1,7 @@
 from dronekit import connect,VehicleMode, LocationGlobalRelative
 import time
 from pymavlink import mavutil
+import math
 
 
 # Connect to the Vehicle (in this case a simulator running the same computer)
@@ -83,5 +84,63 @@ def clear():
     cmds = vehicle.commands
     cmds.clear()
     vehicle.flush()
+
+
+def send_attitude_target(roll_angle=0.0, pitch_angle=0.0,
+                         yaw_angle=None, yaw_rate=0.0, use_yaw_rate=False,
+                         thrust=0.5):
+    if yaw_angle is None:
+        # this value may be unused by the vehicle, depending on use_yaw_rate
+        yaw_angle = vehicle.attitude.yaw
+
+    msg = vehicle.message_factory.set_attitude_target_encode(
+        0,  # time_boot_ms
+        1,  # Target system
+        1,  # Target component
+        0b00000000 if use_yaw_rate else 0b00000100,
+        to_quaternion(roll_angle, pitch_angle, yaw_angle),  # Quaternion
+        0,  # Body roll rate in radian
+        0,  # Body pitch rate in radian
+        math.radians(yaw_rate),  # Body yaw rate in radian/second
+        thrust  # Thrust
+    )
+    vehicle.send_mavlink(msg)
+
+
+def set_attitude(roll_angle=0.0, pitch_angle=0.0,
+                 yaw_angle=None, yaw_rate=0.0, use_yaw_rate=False,
+                 thrust=0.5, duration=0):
+    send_attitude_target(roll_angle, pitch_angle,
+                         yaw_angle, yaw_rate, False,
+                         thrust)
+    start = time.time()
+    while time.time() - start < duration:
+        send_attitude_target(roll_angle, pitch_angle,
+                             yaw_angle, yaw_rate, False,
+                             thrust)
+        time.sleep(0.1)
+    # Reset attitude, or it will persist for 1s more due to the timeout
+    send_attitude_target(0, 0,
+                         0, 0, True,
+                         thrust)
+
+
+def to_quaternion(roll=0.0, pitch=0.0, yaw=0.0):
+    """
+    Convert degrees to quaternions
+    """
+    t0 = math.cos(math.radians(yaw * 0.5))
+    t1 = math.sin(math.radians(yaw * 0.5))
+    t2 = math.cos(math.radians(roll * 0.5))
+    t3 = math.sin(math.radians(roll * 0.5))
+    t4 = math.cos(math.radians(pitch * 0.5))
+    t5 = math.sin(math.radians(pitch * 0.5))
+
+    w = t0 * t2 * t4 + t1 * t3 * t5
+    x = t0 * t3 * t4 - t1 * t2 * t5
+    y = t0 * t2 * t5 + t1 * t3 * t4
+    z = t1 * t2 * t4 - t0 * t3 * t5
+
+    return [w, x, y, z]
 
 
