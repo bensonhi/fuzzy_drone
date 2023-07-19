@@ -1,3 +1,5 @@
+import time
+
 from mobile_net import ObjectRecognition
 from deep_sort.person_id_model.generate_person_features import generate_detections, init_encoder
 from deep_sort.deep_sort_app import run_deep_sort, DeepSORTConfig
@@ -12,14 +14,13 @@ import threading
 import tkinter as tk
 from tkinter import simpledialog
 
-
 # 設定要捕獲的螢幕範圍（左上角座標和右下角座標）
 screen_coordinates = (0, 0, 1920, 1080)  # 自行調整螢幕解析度
 
 drone_kit.arm_and_takeoff(100)
 drone_kit.goto(-35.360354, 149.160218, 100)
-drone_kit.condition_yaw(240, True, True)
-drone_kit.clear()
+drone_kit.condition_yaw(10,relative=True,clock_wise=True)
+# drone_kit.clear()
 
 model = ObjectRecognition()
 encoder = init_encoder()
@@ -28,16 +29,16 @@ FuzzyController = controller.FuzzyController()
 
 selected_object_id = -1
 
+
 # spawn a new thread to wait for input
 def get_target_id():
     ROOT = tk.Tk()
 
     global selected_object_id
-    while(True):
+    while (True):
         ROOT.withdraw()
         selected_object_id = simpledialog.askinteger(title="Test",
-                                          prompt="Which is your desired target?:")
-
+                                                     prompt="Which is your desired target?:")
 
 
 def object_tracking():
@@ -48,9 +49,16 @@ def object_tracking():
 
         if len(boxes) > 0:
             encoding = generate_detections(encoder, boxes, frame)
-            target_box_central=run_deep_sort(frame, encoding, selected_object_id, config)
-            if(target_box_central!=None):
+            target_box_central = run_deep_sort(frame, encoding, selected_object_id, config)
+            if (target_box_central != None):
                 fuzzy_result = FuzzyController.run(target_box_central, frame.shape[0:2][::-1])
+                if fuzzy_result[1] > 0:
+                    drone_kit.condition_yaw(0.2 * fuzzy_result[1],relative=True,clock_wise=False)
+                if fuzzy_result[1] < 0:
+                    drone_kit.condition_yaw(0.2 * -fuzzy_result[1], relative=True, clock_wise=True)
+                time.sleep(10)
+                # drone_kit.set_attitude(pitch_angle=vertical_result, duration=20)
+                drone_kit.clear()
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
