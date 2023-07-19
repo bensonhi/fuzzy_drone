@@ -89,9 +89,8 @@ def clear():
 def send_attitude_target(roll_angle=0.0, pitch_angle=0.0,
                          yaw_angle=None, yaw_rate=0.0, use_yaw_rate=False,
                          thrust=0.5):
-    if yaw_angle is None:
-        # this value may be unused by the vehicle, depending on use_yaw_rate
-        yaw_angle = vehicle.attitude.yaw
+    # this value may be unused by the vehicle, depending on use_yaw_rate
+    yaw_angle = vehicle.attitude.yaw*57.2957795-yaw_angle
 
     msg = vehicle.message_factory.set_attitude_target_encode(
         0,  # time_boot_ms
@@ -105,24 +104,6 @@ def send_attitude_target(roll_angle=0.0, pitch_angle=0.0,
         thrust  # Thrust
     )
     vehicle.send_mavlink(msg)
-
-
-def set_attitude(roll_angle=0.0, pitch_angle=0.0,
-                 yaw_angle=None, yaw_rate=0.0, use_yaw_rate=False,
-                 thrust=0.5, duration=0):
-    send_attitude_target(roll_angle, pitch_angle,
-                         yaw_angle, yaw_rate, False,
-                         thrust)
-    start = time.time()
-    while time.time() - start < duration:
-        send_attitude_target(roll_angle, pitch_angle,
-                             yaw_angle, yaw_rate, False,
-                             thrust)
-        time.sleep(0.1)
-    # Reset attitude, or it will persist for 1s more due to the timeout
-    send_attitude_target(0, 0,
-                         0, 0, True,
-                         thrust)
 
 
 def to_quaternion(roll=0.0, pitch=0.0, yaw=0.0):

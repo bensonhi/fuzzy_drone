@@ -28,7 +28,8 @@ config = DeepSORTConfig()
 FuzzyController = controller.FuzzyController()
 
 selected_object_id = -1
-
+target_box_central = None
+frame=None
 
 # spawn a new thread to wait for input
 def get_target_id():
@@ -42,6 +43,7 @@ def get_target_id():
 
 
 def object_tracking():
+    global target_box_central, frame
     while (True):
         frame = np.array(ImageGrab.grab(bbox=screen_coordinates))
         # ret, frame = cap.read()
@@ -49,28 +51,26 @@ def object_tracking():
 
         if len(boxes) > 0:
             encoding = generate_detections(encoder, boxes, frame)
-            target_box_central = run_deep_sort(frame, encoding, selected_object_id, config)
-            if (target_box_central != None):
-                fuzzy_result = FuzzyController.run(target_box_central, frame.shape[0:2][::-1])
-                if fuzzy_result[1] > 0:
-                    drone_kit.condition_yaw(0.2 * fuzzy_result[1],relative=True,clock_wise=False)
-                if fuzzy_result[1] < 0:
-                    drone_kit.condition_yaw(0.2 * -fuzzy_result[1], relative=True, clock_wise=True)
-                time.sleep(10)
-                # drone_kit.set_attitude(pitch_angle=vertical_result, duration=20)
-                drone_kit.clear()
-
+            target_box_central=run_deep_sort(frame, encoding, selected_object_id, config)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     cv2.destroyAllWindows()
 
+def fuzzy_control():
+    while(1):
+        if (target_box_central != None):
+            fuzzy_result = FuzzyController.run(target_box_central, frame.shape[0:2][::-1])
+            drone_kit.send_attitude_target(0.0,-0.2 * fuzzy_result[0],0.2 * fuzzy_result[1], 0.0, False,0.5)
 
 input_target_thread = threading.Thread(target=get_target_id)
 tracking_thread = threading.Thread(target=object_tracking)
+fuzzy_thread = threading.Thread(target=fuzzy_control)
 
 input_target_thread.start()
 tracking_thread.start()
+fuzzy_thread.start()
 
 input_target_thread.join()
 tracking_thread.join()
+fuzzy_thread.join()
