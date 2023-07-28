@@ -87,7 +87,7 @@ def clear():
 
 
 def send_attitude_target(roll_angle=0.0, pitch_angle=0.0,
-                         yaw_angle=None, yaw_rate=0.0, use_yaw_rate=False,
+                         yaw_angle=0.0, yaw_rate=0.0, use_yaw_rate=False,
                          thrust=0.5):
     # this value may be unused by the vehicle, depending on use_yaw_rate
     yaw_angle = vehicle.attitude.yaw*57.2957795-yaw_angle

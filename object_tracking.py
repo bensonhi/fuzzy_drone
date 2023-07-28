@@ -13,6 +13,8 @@ import drone_kit
 import threading
 import tkinter as tk
 from tkinter import simpledialog
+import time
+
 
 # 設定要捕獲的螢幕範圍（左上角座標和右下角座標）
 screen_coordinates = (0, 0, 1920, 1080)  # 自行調整螢幕解析度
@@ -36,10 +38,10 @@ def get_target_id():
     ROOT = tk.Tk()
 
     global selected_object_id
-    while (True):
+    while(True):
         ROOT.withdraw()
         selected_object_id = simpledialog.askinteger(title="Test",
-                                                     prompt="Which is your desired target?:")
+                                          prompt="Which is your desired target?:")
 
 
 def object_tracking():
@@ -62,6 +64,7 @@ def fuzzy_control():
         if (target_box_central != None):
             fuzzy_result = FuzzyController.run(target_box_central, frame.shape[0:2][::-1])
             drone_kit.send_attitude_target(0.0,-0.2 * fuzzy_result[0],0.2 * fuzzy_result[1], 0.0, False,0.5)
+            time.sleep(0.1)
 
 input_target_thread = threading.Thread(target=get_target_id)
 tracking_thread = threading.Thread(target=object_tracking)
