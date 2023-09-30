@@ -1,6 +1,7 @@
 from __future__ import division, print_function, absolute_import
 import numpy as np
 import cv2
+import time
 
 from deep_sort.application_util import preprocessing
 from deep_sort.application_util.visualization import draw_trackers
@@ -66,20 +67,19 @@ def run(image, detection, config, min_confidence,
     indices = preprocessing.non_max_suppression(
         boxes, nms_max_overlap, scores)
     detections = [detections[i] for i in indices]
-
     # Update tracker.
     tracker.predict()
     tracker.update(detections)
 
     target_box_central=None
+    draw_trackers(tracker.tracks, img_cpy)
+
     for track in tracker.tracks:
         if track.track_id == selected_object_id:
             x, y, w, h = track.to_tlwh()
-            target_box_central=[x+w/2, y+h/2]
-            break
-
-    draw_trackers(tracker.tracks, img_cpy)
-    return target_box_central
+            cv2.destroyAllWindows()
+            return list(map(int, [x, y, w, h]))
+    return None
 
 def run_deep_sort(image, detection, selected_object_id, config):
     min_confidence = 0.1

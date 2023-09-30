@@ -5,7 +5,7 @@ import math
 
 
 # Connect to the Vehicle (in this case a simulator running the same computer)
-vehicle = connect('tcp:127.0.0.1:5762', wait_ready=True)
+vehicle = connect('tcp:127.0.0.1:5762')
 
 def arm_and_takeoff(aTargetAltitude):
     """
@@ -91,6 +91,8 @@ def send_attitude_target(roll_angle=0.0, pitch_angle=0.0,
                          thrust=0.5):
     # this value may be unused by the vehicle, depending on use_yaw_rate
     yaw_angle = vehicle.attitude.yaw*57.2957795-yaw_angle
+    # print(vehicle.attitude.pitch)
+    pitch_angle = vehicle.attitude.pitch*57.2957795 -pitch_angle
 
     msg = vehicle.message_factory.set_attitude_target_encode(
         0,  # time_boot_ms
@@ -104,6 +106,8 @@ def send_attitude_target(roll_angle=0.0, pitch_angle=0.0,
         thrust  # Thrust
     )
     vehicle.send_mavlink(msg)
+    print("after vehicle yaw : " + str(vehicle.attitude.yaw * 57.2957795))
+    print("after vehicle pitch : " + str(vehicle.attitude.pitch * 57.2957795))
 
 
 def to_quaternion(roll=0.0, pitch=0.0, yaw=0.0):
